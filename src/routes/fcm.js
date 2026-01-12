@@ -1,3 +1,7 @@
+const express = require("express");
+const router = express.Router();
+const UserProfile = require("../models/UserProfile");
+
 router.post("/updateFcmToken", async (req, res) => {
   try {
     const { userId, fcmToken } = req.body;
@@ -48,3 +52,4 @@ router.post("/logout", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+

@@ -10,6 +10,7 @@ const foodRoutes = require("./src/routes/food");
 const aiRoutes = require("./src/routes/ai.js");
 const waterRoutes = require("./src/routes/water");
 const reportRoutes = require("./src/routes/report");
+const fcm = require("./src/routes/fcm");
 
 const app = express();
 app.use(express.json());
@@ -30,7 +31,9 @@ app.use("/api", foodRoutes);
 app.use("/api", aiRoutes);
 app.use("/api", waterRoutes);
 app.use("/api", reportRoutes);
+app.use("/api",fcm);
 
 // start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+

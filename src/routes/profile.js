@@ -117,7 +117,6 @@ router.put("/editProfile/:userId", async (req, res) => {
 });
 
 
-// 🔔 POST /updateFcmToken
 router.post("/updateFcmToken", async (req, res) => {
   try {
     const { userId, fcmToken } = req.body;
@@ -128,29 +127,56 @@ router.post("/updateFcmToken", async (req, res) => {
       });
     }
 
-    const updatedProfile = await UserProfile.findOneAndUpdate(
-      { userId },
-      { fcmToken },
-      { new: true }
-    );
+    const profile = await UserProfile.findOne({ userId });
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
 
-    if (!updatedProfile) {
-      return res.status(404).json({
-        error: "User profile not found",
+    // ✅ Add only if not already present
+    if (!profile.fcmTokens.includes(fcmToken)) {
+      profile.fcmTokens.push(fcmToken);
+      await profile.save();
+    }
+
+    res.json({
+      message: "✅ FCM token saved",
+      totalTokens: profile.fcmTokens.length,
+    });
+  } catch (err) {
+    console.error("FCM update error:", err);
+    res.status(500).json({ error: "Failed to update FCM token" });
+  }
+});
+router.post("/logout", async (req, res) => {
+  try {
+    const { userId, fcmToken } = req.body;
+
+    if (!userId || !fcmToken) {
+      return res.status(400).json({
+        error: "userId and fcmToken are required",
       });
     }
 
-    return res.json({
-      message: "✅ FCM token updated successfully",
-      fcmToken: updatedProfile.fcmToken,
+    const profile = await UserProfile.findOneAndUpdate(
+      { userId },
+      { $pull: { fcmTokens: fcmToken } },
+      { new: true }
+    );
+
+    if (!profile) {
+      return res.status(404).json({ error: "Profile not found" });
+    }
+
+    res.json({
+      message: "✅ Logged out successfully",
+      remainingTokens: profile.fcmTokens.length,
     });
   } catch (err) {
-    console.error("❌ Update FCM Token Error:", err);
-    return res.status(500).json({
-      error: "Failed to update FCM token",
-    });
+    console.error("Logout error:", err);
+    res.status(500).json({ error: "Logout failed" });
   }
 });
 
 module.exports = router;
+
 

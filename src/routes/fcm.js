@@ -1,3 +1,4 @@
+console.log("fcm_file_loaded");
 const express = require("express");
 const router = express.Router();
 const UserProfile = require("../models/UserProfile");
@@ -53,3 +54,4 @@ router.post("/logout", async (req, res) => {
   }
 });
 
+module.exports = router;

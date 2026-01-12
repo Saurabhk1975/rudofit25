@@ -116,4 +116,41 @@ router.put("/editProfile/:userId", async (req, res) => {
   }
 });
 
+
+// 🔔 POST /updateFcmToken
+router.post("/updateFcmToken", async (req, res) => {
+  try {
+    const { userId, fcmToken } = req.body;
+
+    if (!userId || !fcmToken) {
+      return res.status(400).json({
+        error: "userId and fcmToken are required",
+      });
+    }
+
+    const updatedProfile = await UserProfile.findOneAndUpdate(
+      { userId },
+      { fcmToken },
+      { new: true }
+    );
+
+    if (!updatedProfile) {
+      return res.status(404).json({
+        error: "User profile not found",
+      });
+    }
+
+    return res.json({
+      message: "✅ FCM token updated successfully",
+      fcmToken: updatedProfile.fcmToken,
+    });
+  } catch (err) {
+    console.error("❌ Update FCM Token Error:", err);
+    return res.status(500).json({
+      error: "Failed to update FCM token",
+    });
+  }
+});
+
 module.exports = router;
+

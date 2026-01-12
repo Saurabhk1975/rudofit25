@@ -17,6 +17,12 @@ const UserProfileSchema = new mongoose.Schema({
   targetProtein: { type: Number, default: 0 },
   targetFat: { type: Number, default: 0 },
   targetCarb: { type: Number, default: 0 },
+   fcmToken: {
+      type: String,
+      default: null,
+      index: true, // helpful for notification jobs
+    },
 });
 
 module.exports = mongoose.model("UserProfile", UserProfileSchema);
+

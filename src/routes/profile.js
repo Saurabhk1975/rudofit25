@@ -117,66 +117,72 @@ router.put("/editProfile/:userId", async (req, res) => {
 });
 
 
+// 🔔 UPDATE / ADD FCM TOKEN (multi-device support)
 router.post("/updateFcmToken", async (req, res) => {
   try {
     const { userId, fcmToken } = req.body;
 
     if (!userId || !fcmToken) {
-      return res.status(400).json({
-        error: "userId and fcmToken are required",
-      });
+      return res.status(400).json({ error: "userId and fcmToken are required" });
     }
 
     const profile = await UserProfile.findOne({ userId });
     if (!profile) {
-      return res.status(404).json({ error: "Profile not found" });
+      return res.status(404).json({ error: "User profile not found" });
     }
 
-    // ✅ Add only if not already present
-    if (!profile.fcmTokens.includes(fcmToken)) {
-      profile.fcmTokens.push(fcmToken);
-      await profile.save();
+    // initialize array if missing
+    if (!Array.isArray(profile.fcmToken)) {
+      profile.fcmToken = [];
     }
 
-    res.json({
-      message: "✅ FCM token saved",
-      totalTokens: profile.fcmTokens.length,
+    // avoid duplicates
+    if (!profile.fcmToken.includes(fcmToken)) {
+      profile.fcmToken.push(fcmToken);
+    }
+
+    await profile.save();
+
+    return res.json({
+      message: "FCM token updated successfully",
+      fcmTokens: profile.fcmToken,
     });
   } catch (err) {
-    console.error("FCM update error:", err);
-    res.status(500).json({ error: "Failed to update FCM token" });
+    console.error("❌ updateFcmToken error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
+// 🚪 LOGOUT — REMOVE FCM TOKEN
 router.post("/logout", async (req, res) => {
   try {
     const { userId, fcmToken } = req.body;
 
     if (!userId || !fcmToken) {
-      return res.status(400).json({
-        error: "userId and fcmToken are required",
-      });
+      return res.status(400).json({ error: "userId and fcmToken required" });
     }
 
-    const profile = await UserProfile.findOneAndUpdate(
-      { userId },
-      { $pull: { fcmTokens: fcmToken } },
-      { new: true }
+    const profile = await UserProfile.findOne({ userId });
+    if (!profile) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    profile.fcmToken = (profile.fcmToken || []).filter(
+      (token) => token !== fcmToken
     );
 
-    if (!profile) {
-      return res.status(404).json({ error: "Profile not found" });
-    }
+    await profile.save();
 
-    res.json({
-      message: "✅ Logged out successfully",
-      remainingTokens: profile.fcmTokens.length,
+    return res.json({
+      message: "Logged out successfully",
+      fcmTokens: profile.fcmToken,
     });
   } catch (err) {
-    console.error("Logout error:", err);
-    res.status(500).json({ error: "Logout failed" });
+    console.error("❌ logout error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 });
 
 module.exports = router;
+
 
 

@@ -31,33 +31,6 @@ router.post("/waterTracker", async (req, res) => {
     res.status(500).json({ error: "Server error while updating water tracker" });
   }
 });
-router.post("/updateFcmToken", async (req, res) => {
-  try {
-    const { userId, fcmToken } = req.body;
-
-    if (!userId || !fcmToken) {
-      return res.status(400).json({ error: "userId and fcmToken required" });
-    }
-
-    const profile = await UserProfile.findOne({ userId });
-    if (!profile) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    if (!profile.fcmTokens.includes(fcmToken)) {
-      profile.fcmTokens.push(fcmToken);
-      await profile.save();
-    }
-
-    return res.json({
-      message: "FCM token saved",
-      fcmTokens: profile.fcmTokens,
-    });
-  } catch (err) {
-    console.error("FCM update error:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-});
 
 
 // GET /waterTracker/:userId — Get today’s water data for that user
@@ -91,4 +64,5 @@ router.get("/waterTracker/:userId", async (req, res) => {
 });
 
 module.exports = router;
+
 

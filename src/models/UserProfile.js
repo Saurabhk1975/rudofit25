@@ -13,6 +13,7 @@ const UserProfileSchema = new mongoose.Schema(
     weightUnit: String,
     heightUnit: String,
     targetWeight: Number,
+    location:String,
 
     goal: {
       type: String,
@@ -40,3 +41,4 @@ const UserProfileSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("UserProfile", UserProfileSchema);
+
